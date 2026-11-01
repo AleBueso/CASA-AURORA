@@ -31,9 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
-   ### Extensiones de VS Code ###
-   .github/modernize/
+### Extensiones de VS Code ###
+.github/modernize/
 
-   ### Secretos ###
-   .env
-   .env.*
+### Secretos ###
+.env
+.env.*
