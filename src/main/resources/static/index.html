@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- SEO -->
-  <title>Casa Aurora · Vino artesanal de flor de Jamaica en Danlí</title>
-  <meta name="description" content="Casa Aurora elabora vino artesanal de flor de Jamaica en Danlí, El Paraíso, Honduras. Pedidos por WhatsApp, Instagram y Facebook.">
-  <meta name="keywords" content="vino de jamaica, vino artesanal, Danlí, El Paraíso, Honduras, Casa Aurora">
+  <title>Casa Aurora · Panel de gestión de lotes y pedidos</title>
+  <meta name="description" content="Panel de gestión de Casa Aurora, vino artesanal de flor de Jamaica de Danlí, Honduras: lotes en producción, botellas disponibles y pedidos pendientes en un solo lugar.">
+  <meta name="keywords" content="Casa Aurora, vino de jamaica, control de lotes, inventario, pedidos, Danlí, Honduras">
   <meta name="author" content="Casa Aurora">
   <link rel="canonical" href="https://casa-aurora.vercel.app/">
   <meta name="theme-color" content="#621A29">
@@ -15,8 +15,8 @@
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Casa Aurora">
-  <meta property="og:title" content="Casa Aurora · Vino artesanal de flor de Jamaica">
-  <meta property="og:description" content="Vino artesanal de flor de Jamaica hecho en Danlí, Honduras. Hacé tu pedido por WhatsApp.">
+  <meta property="og:title" content="Casa Aurora · Panel de gestión">
+  <meta property="og:description" content="Lotes, botellas disponibles y pedidos pendientes de Casa Aurora en un solo lugar.">
   <meta property="og:url" content="https://casa-aurora.vercel.app/">
   <meta property="og:image" content="https://casa-aurora.vercel.app/img/og-image.png">
   <meta property="og:image:width" content="1200">
@@ -28,6 +28,9 @@
   <link rel="icon" href="/favicon.ico" sizes="any">
   <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
   <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
 
   <!-- Código de verificación -->
   <meta name="verificacion" content="LEARN-CAP-1E72416E">
@@ -93,18 +96,18 @@
 <body>
   <header>
     <a class="marca" href="/"><img src="/img/logo-monograma.png" alt="Monograma de Casa Aurora"><span>Casa Aurora</span></a>
-    <a class="btn arena" href="/login">Iniciar sesión</a>
+    <a class="btn arena" href="/login">Ingresar</a>
   </header>
 
   <section class="hero">
     <div class="hero-contenido">
       <img src="/img/logo-insignia.png" alt="Insignia de Casa Aurora, vino artesanal" width="420" height="420">
       <div>
-        <h1>Casa Aurora</h1>
-        <p class="subtitulo">Vino artesanal de flor de Jamaica</p>
+        <h1>Panel de gestión</h1>
+        <p class="subtitulo">Casa Aurora · Vino artesanal de flor de Jamaica</p>
         <div class="linea"></div>
-        <p>Elaborado en micro lotes en Danlí, El Paraíso, desde 2019. Cada botella fermenta 8 días y reposa 3 antes de llegar a tu mesa.</p>
-        <a class="btn" href="#pedidos">¿Cómo hago mi pedido?</a>
+        <p>Todo el negocio en un solo lugar: lotes en producción, botellas disponibles, botellas producidas y pedidos pendientes, desde el celular o la computadora.</p>
+        <a class="btn" href="/login">Ingresar al panel</a>
       </div>
     </div>
   </section>
@@ -112,21 +115,21 @@
   <main>
     <div class="grid">
       <div class="card">
-        <h3>Hecho a mano</h3>
-        <p>Producimos en micro lotes de 5 galones para cuidar el sabor de cada botella.</p>
+        <h3>Lotes</h3>
+        <p>Cada lote con sus días de fermentación y reposo calculados solos, y aviso cuando está listo para embotellar.</p>
       </div>
       <div class="card">
-        <h3>Botella de 750 ml</h3>
-        <p>L.300 por unidad y L.280 por mayoreo, desde 7 botellas.</p>
+        <h3>Botellas</h3>
+        <p>Cuántas botellas se han producido, cuántas están en bodega y cuántas quedan disponibles para vender.</p>
       </div>
       <div class="card">
-        <h3>Ingredientes naturales</h3>
-        <p>Flor de Jamaica, azúcar, agua y levadura. Nada más.</p>
+        <h3>Pedidos</h3>
+        <p>Quién tiene pedidos pendientes, en orden de llegada, con su fecha de entrega y aviso si alguno se puede atrasar.</p>
       </div>
     </div>
 
-    <h2 id="pedidos">¿Cómo hago mi pedido?</h2>
-    <p>Escribinos por WhatsApp, Instagram o Facebook, o visitanos en las ferias de emprendedores de Danlí. Registramos tu pedido por orden de llegada y te confirmamos la fecha de entrega.</p>
+    <h2>Acceso privado</h2>
+    <p>El panel es de uso exclusivo de los dueños de Casa Aurora. Toda la información del negocio está protegida y solo se puede ver después de iniciar sesión.</p>
   </main>
 
   <footer>
@@ -134,5 +137,14 @@
     © 2026 Casa Aurora · Danlí, El Paraíso, Honduras<br>
     Código de verificación: LEARN-CAP-1E72416E
   </footer>
+
+  <!-- PWA: registro del service worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js").catch((e) => console.warn("Service worker no registrado:", e));
+      });
+    }
+  </script>
 </body>
 </html>

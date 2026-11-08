@@ -1,0 +1,20 @@
+{
+  "id": "/",
+  "name": "Casa Aurora · Panel de gestión",
+  "short_name": "Casa Aurora",
+  "description": "Panel de gestión de Casa Aurora: lotes en producción, botellas disponibles y pedidos pendientes.",
+  "lang": "es-HN",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#E6D3A1",
+  "theme_color": "#621A29",
+  "categories": ["business", "productivity", "food"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

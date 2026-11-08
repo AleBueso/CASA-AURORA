@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sin conexión · Casa Aurora</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#621A29">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <style>
+    :root { --arena:#E6D3A1; --crema:#FBF6EA; --carbon:#192023; --vino:#621A29; --vino-2:#7A2236; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+           font-family:"Lora", Georgia, serif; background:var(--arena); color:var(--carbon);
+           text-align:center; padding:24px; }
+    img { width:96px; height:96px; background:var(--crema); border-radius:50%; padding:6px; }
+    h1 { font-family:"Oswald", "Arial Narrow", sans-serif; text-transform:uppercase; letter-spacing:.04em;
+         font-size:1.8rem; margin:16px 0 12px; color:var(--vino); }
+    p { max-width:420px; margin:0 auto 28px; font-style:italic; }
+    button { padding:12px 24px; border:0; border-radius:6px; background:var(--vino); color:var(--crema);
+             font-family:"Oswald", "Arial Narrow", sans-serif; text-transform:uppercase; letter-spacing:.04em;
+             font-size:1rem; cursor:pointer; }
+    button:hover { background:var(--vino-2); }
+    @media (max-width: 480px) { h1 { font-size:1.4rem; } }
+  </style>
+</head>
+<body>
+  <main>
+    <img src="/img/logo-monograma.png" alt="Monograma de Casa Aurora">
+    <h1>Sin conexión</h1>
+    <p>Parece que no tenés internet en este momento. Revisá tu conexión y volvé a intentarlo.</p>
+    <button onclick="location.reload()">Reintentar</button>
+  </main>
+</body>
+</html>
