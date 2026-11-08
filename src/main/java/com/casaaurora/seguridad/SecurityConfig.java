@@ -1,5 +1,7 @@
 package com.casaaurora.seguridad;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +18,8 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
 import org.springframework.security.web.header.writers.StaticHeadersWriter;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Seguridad de Casa Aurora.
@@ -52,15 +56,16 @@ public class SecurityConfig {
                 .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/**").hasRole("ADMIN")
                 .anyRequest().permitAll())
+            // Login y logout responden JSON (sin redirecciones), para funcionar detrás de Vercel
             .formLogin(form -> form
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/admin", true)
-                .failureUrl("/login?error")
+                .successHandler((request, response, auth) -> responderJson(response, 200, "{\"ok\":true}"))
+                .failureHandler((request, response, error) -> responderJson(response, 401, "{\"ok\":false}"))
                 .permitAll())
             .logout(logout -> logout
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout")
+                .logoutSuccessHandler((request, response, auth) -> responderJson(response, 200, "{\"ok\":true}"))
                 .deleteCookies("JSESSIONID"))
             .exceptionHandling(e -> e
                 .defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), esApi))
@@ -74,6 +79,13 @@ public class SecurityConfig {
                 .addHeaderWriter(new StaticHeadersWriter("Cross-Origin-Opener-Policy", "same-origin")));
 
         return http.build();
+    }
+
+    private static void responderJson(HttpServletResponse response, int estado, String json) throws IOException {
+        response.setStatus(estado);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(json);
     }
 
     /** Usuario de los dueños. El usuario y la contraseña vienen de variables de entorno. */

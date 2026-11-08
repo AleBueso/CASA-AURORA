@@ -29,6 +29,7 @@
     button { width:100%; margin-top:22px; padding:13px; border:0; border-radius:6px; background:var(--vino); color:var(--crema);
              font-family:"Oswald", sans-serif; text-transform:uppercase; letter-spacing:.05em; font-size:1rem; cursor:pointer; }
     button:hover { background:var(--vino-2); }
+    button:disabled { opacity:.6; cursor:wait; }
     .aviso { display:none; padding:10px 12px; border-radius:6px; margin-bottom:8px; font-size:.95rem; text-align:left; }
     .error { background:#f6dcdf; color:#7a1a2a; }
     .ok { background:#e2efe0; color:#285a2b; }
@@ -45,7 +46,7 @@
     <div id="error" class="aviso error" role="alert">Usuario o contraseña incorrectos.</div>
     <div id="salida" class="aviso ok" role="status">Cerraste sesión correctamente.</div>
 
-    <form method="post" action="/login">
+    <form id="form-login" method="post" action="/login">
       <label for="username">Usuario</label>
       <input id="username" name="username" autocomplete="username" required autofocus>
 
@@ -53,26 +54,60 @@
       <input id="password" name="password" type="password" autocomplete="current-password" required>
 
       <input type="hidden" id="csrf">
-      <button type="submit">Iniciar sesión</button>
+      <button id="entrar" type="submit">Iniciar sesión</button>
     </form>
 
     <a class="volver" href="/">← Volver al inicio</a>
   </main>
 
   <script>
-    // Mensajes de error o de cierre de sesión
-    const params = new URLSearchParams(location.search);
-    if (params.has("error")) document.getElementById("error").style.display = "block";
-    if (params.has("logout")) document.getElementById("salida").style.display = "block";
+    const error = document.getElementById("error");
+    const salida = document.getElementById("salida");
+    const boton = document.getElementById("entrar");
+    const form = document.getElementById("form-login");
+
+    if (new URLSearchParams(location.search).has("logout")) salida.style.display = "block";
 
     // Token CSRF de seguridad para que el formulario se pueda enviar
-    fetch("/api/csrf", { credentials: "same-origin" })
-      .then((r) => r.json())
-      .then((d) => {
-        const campo = document.getElementById("csrf");
-        campo.name = d.parametro;
-        campo.value = d.token;
-      });
+    function cargarCsrf() {
+      return fetch("/api/csrf", { credentials: "same-origin", cache: "no-store" })
+        .then((r) => r.json())
+        .then((d) => {
+          const campo = document.getElementById("csrf");
+          campo.name = d.parametro;
+          campo.value = d.token;
+        });
+    }
+    cargarCsrf();
+
+    // Envío del login sin recargar la página: el servidor responde {ok:true} o 401
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (boton.disabled) return;
+      boton.disabled = true;
+      boton.textContent = "Ingresando…";
+      error.style.display = "none";
+      salida.style.display = "none";
+      try {
+        const r = await fetch("/login", {
+          method: "POST",
+          body: new URLSearchParams(new FormData(form)),
+          credentials: "same-origin",
+          headers: { "Accept": "application/json" }
+        });
+        if (r.ok) {
+          location.href = "/admin";
+          return;
+        }
+        error.style.display = "block";
+      } catch (err) {
+        error.textContent = "No se pudo conectar. Intentá de nuevo.";
+        error.style.display = "block";
+      }
+      await cargarCsrf();
+      boton.disabled = false;
+      boton.textContent = "Iniciar sesión";
+    });
   </script>
 </body>
 </html>

@@ -63,10 +63,7 @@
     <a class="marca" href="/admin"><img src="/img/logo-monograma.png" alt="Monograma de Casa Aurora"><span>Casa Aurora</span></a>
     <div class="usuario">
       <span class="nombre">Hola, <strong id="usuario">…</strong></span>
-      <form method="post" action="/logout">
-        <input type="hidden" id="csrf">
-        <button class="btn" type="submit">Cerrar sesión</button>
-      </form>
+      <button class="btn" id="salir" type="button">Cerrar sesión</button>
     </div>
   </header>
 
@@ -102,19 +99,25 @@
 
   <script>
     // Usuario que inició sesión
-    fetch("/api/yo", { credentials: "same-origin" })
+    fetch("/api/yo", { credentials: "same-origin", cache: "no-store" })
       .then((r) => r.ok ? r.json() : Promise.reject())
       .then((d) => { document.getElementById("usuario").textContent = d.usuario; })
       .catch(() => { location.href = "/login"; });
 
-    // Token CSRF para el botón de cerrar sesión
-    fetch("/api/csrf", { credentials: "same-origin" })
-      .then((r) => r.json())
-      .then((d) => {
-        const campo = document.getElementById("csrf");
-        campo.name = d.parametro;
-        campo.value = d.token;
-      });
+    // Cerrar sesión: pide el token CSRF y envía el logout sin redirecciones
+    document.getElementById("salir").addEventListener("click", async (e) => {
+      e.target.disabled = true;
+      try {
+        const d = await fetch("/api/csrf", { credentials: "same-origin", cache: "no-store" }).then((r) => r.json());
+        await fetch("/logout", {
+          method: "POST",
+          body: new URLSearchParams({ [d.parametro]: d.token }),
+          credentials: "same-origin"
+        });
+      } finally {
+        location.href = "/login?logout";
+      }
+    });
   </script>
 </body>
 </html>
