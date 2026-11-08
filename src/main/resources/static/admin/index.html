@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel · Casa Aurora</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#621A29">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --arena:#E6D3A1; --crema:#FBF6EA; --carbon:#192023; --vino:#621A29; --vino-2:#7A2236; --linea:#e3d6b3;
+      --titulo:"Oswald", "Arial Narrow", sans-serif; --texto:"Lora", Georgia, serif;
+    }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:var(--texto); background:var(--crema); color:var(--carbon); line-height:1.6; }
+    h1, h2, h3, .marca, nav a, .btn { font-family:var(--titulo); text-transform:uppercase; letter-spacing:.04em; }
+
+    header { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px 24px; background:var(--carbon); color:var(--arena); }
+    .marca { display:flex; align-items:center; gap:10px; color:var(--arena); font-size:1.15rem; font-weight:600; text-decoration:none; }
+    .marca img { width:40px; height:40px; background:var(--crema); border-radius:50%; padding:3px; }
+    .usuario { display:flex; align-items:center; gap:14px; font-size:.95rem; }
+    .btn { display:inline-block; padding:9px 18px; border:0; border-radius:6px; background:var(--arena); color:var(--carbon);
+           font-size:.85rem; cursor:pointer; text-decoration:none; }
+    .btn:hover { background:#d9c48d; }
+
+    nav { display:flex; gap:4px; padding:0 24px; background:var(--vino); overflow-x:auto; }
+    nav a { color:var(--crema); text-decoration:none; padding:12px 16px; font-size:.9rem; border-bottom:3px solid transparent; white-space:nowrap; opacity:.85; }
+    nav a.activo, nav a:hover { border-color:var(--arena); opacity:1; }
+
+    main { max-width:1100px; margin:0 auto; padding:28px 24px 48px; }
+    h1 { font-size:1.8rem; margin:0 0 4px; }
+    .saludo { font-style:italic; color:var(--vino); margin:0 0 24px; }
+
+    .kpis { display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; }
+    .kpi { background:#fff; border:1px solid var(--linea); border-top:4px solid var(--vino); border-radius:8px; padding:18px; }
+    .kpi b { display:block; font-family:var(--titulo); font-size:2.2rem; color:var(--vino); line-height:1.1; }
+    .kpi span { font-size:.9rem; }
+
+    section { margin-top:32px; }
+    h2 { font-size:1.25rem; margin:0 0 12px; }
+    .vacio { background:#fff; border:1px dashed #cdbf98; border-radius:8px; padding:24px; text-align:center; font-style:italic; color:#5E5A50; }
+
+    footer { text-align:center; padding:24px; font-size:.8rem; color:#5E5A50; }
+
+    @media (max-width: 860px) { .kpis { grid-template-columns:repeat(2, 1fr); } }
+    @media (max-width: 480px) {
+      header { padding:10px 14px; }
+      .marca span, .usuario .nombre { display:none; }
+      nav { padding:0 8px; }
+      main { padding:20px 14px 36px; }
+      .kpi b { font-size:1.8rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="marca" href="/admin"><img src="/img/logo-monograma.png" alt="Monograma de Casa Aurora"><span>Casa Aurora</span></a>
+    <div class="usuario">
+      <span class="nombre">Hola, <strong id="usuario">…</strong></span>
+      <form method="post" action="/logout">
+        <input type="hidden" id="csrf">
+        <button class="btn" type="submit">Cerrar sesión</button>
+      </form>
+    </div>
+  </header>
+
+  <nav>
+    <a href="#resumen" class="activo">Resumen</a>
+    <a href="#lotes">Lotes</a>
+    <a href="#pedidos">Pedidos</a>
+  </nav>
+
+  <main>
+    <h1 id="resumen">Panel de gestión</h1>
+    <p class="saludo">Todo el negocio de Casa Aurora en un solo lugar.</p>
+
+    <div class="kpis">
+      <div class="kpi"><b id="k-disponibles">—</b><span>Botellas disponibles</span></div>
+      <div class="kpi"><b id="k-producidas">—</b><span>Botellas producidas</span></div>
+      <div class="kpi"><b id="k-lotes">—</b><span>Lotes en proceso</span></div>
+      <div class="kpi"><b id="k-pedidos">—</b><span>Pedidos pendientes</span></div>
+    </div>
+
+    <section id="lotes">
+      <h2>Lotes</h2>
+      <div class="vacio">Aquí se mostrarán los lotes en producción.</div>
+    </section>
+
+    <section id="pedidos">
+      <h2>Pedidos pendientes</h2>
+      <div class="vacio">Aquí se mostrarán los pedidos pendientes por orden de llegada.</div>
+    </section>
+  </main>
+
+  <footer>Casa Aurora · Panel privado · LEARN-CAP-1E72416E</footer>
+
+  <script>
+    // Usuario que inició sesión
+    fetch("/api/yo", { credentials: "same-origin" })
+      .then((r) => r.ok ? r.json() : Promise.reject())
+      .then((d) => { document.getElementById("usuario").textContent = d.usuario; })
+      .catch(() => { location.href = "/login"; });
+
+    // Token CSRF para el botón de cerrar sesión
+    fetch("/api/csrf", { credentials: "same-origin" })
+      .then((r) => r.json())
+      .then((d) => {
+        const campo = document.getElementById("csrf");
+        campo.name = d.parametro;
+        campo.value = d.token;
+      });
+  </script>
+</body>
+</html>
