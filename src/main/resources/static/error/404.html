@@ -5,24 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Página no encontrada · Casa Aurora</title>
   <meta name="robots" content="noindex">
-  <meta name="theme-color" content="#7d1734">
+  <meta name="theme-color" content="#621A29">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;1,400&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
   <style>
-    :root { --vino:#7d1734; --vino-2:#a32a4c; --crema:#fbf7f4; --tinta:#2a171d; --gris:#6e6166; }
-    * { box-sizing: border-box; }
+    :root { --arena:#E6D3A1; --crema:#FBF6EA; --carbon:#192023; --vino:#621A29; --vino-2:#7A2236; }
+    * { box-sizing:border-box; }
     body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
-           font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-           background:var(--crema); color:var(--tinta); text-align:center; padding:24px; }
-    .codigo { font-size:6rem; font-weight:800; color:var(--vino); line-height:1; margin:0; }
-    h1 { font-size:1.6rem; margin:12px 0; }
-    p { color:var(--gris); max-width:420px; margin:0 auto 28px; }
-    .btn { display:inline-block; padding:12px 22px; border-radius:8px; background:var(--vino);
-           color:#fff; text-decoration:none; font-weight:600; }
+           font-family:"Lora", Georgia, serif; background:var(--arena); color:var(--carbon);
+           text-align:center; padding:24px; }
+    img { width:96px; height:96px; background:var(--crema); border-radius:50%; padding:6px; }
+    .codigo { font-family:"Oswald", sans-serif; font-size:6rem; font-weight:600; color:var(--vino); line-height:1; margin:16px 0 0; }
+    h1 { font-family:"Oswald", sans-serif; text-transform:uppercase; letter-spacing:.04em; font-size:1.6rem; margin:8px 0 12px; }
+    p { max-width:440px; margin:0 auto 28px; font-style:italic; }
+    .btn { display:inline-block; padding:12px 24px; border-radius:6px; background:var(--vino); color:var(--crema);
+           text-decoration:none; font-family:"Oswald", sans-serif; text-transform:uppercase; letter-spacing:.04em; }
     .btn:hover { background:var(--vino-2); }
     @media (max-width: 480px) { .codigo { font-size:4.5rem; } h1 { font-size:1.3rem; } }
   </style>
 </head>
 <body>
   <main>
+    <img src="/img/logo-monograma.png" alt="Monograma de Casa Aurora">
     <p class="codigo">404</p>
     <h1>Esta página no existe</h1>
     <p>Puede que el enlace esté mal escrito o que la página se haya movido. Volvé al inicio para seguir navegando.</p>
