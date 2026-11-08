@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /api/
 
-Sitemap: https://casa-aurora.vercel.app/sitemap.xml
+Sitemap: https://casa-aurora-eta.vercel.app/sitemap.xml
