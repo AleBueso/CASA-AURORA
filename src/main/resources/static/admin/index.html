@@ -48,6 +48,22 @@
 
     footer { text-align:center; padding:24px; font-size:.8rem; color:#5E5A50; }
 
+    .alerta { background:#f6dcdf; border-left:4px solid var(--vino); border-radius:6px; padding:12px 14px; margin-bottom:8px; }
+    .sin-alertas { background:#e2efe0; border-left:4px solid #2f6b3a; border-radius:6px; padding:12px 14px; color:#285a2b; }
+    .lista { display:grid; gap:12px; }
+    .item { background:#fff; border:1px solid var(--linea); border-radius:8px; padding:14px 16px; }
+    .item .cab { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; flex-wrap:wrap; }
+    .item .meta { color:#5E5A50; font-size:.92rem; margin:4px 0 0; }
+    .chip { display:inline-block; padding:3px 10px; border-radius:999px; font-family:var(--titulo); font-size:.75rem; letter-spacing:.05em; text-transform:uppercase; }
+    .FERMENTANDO { background:#fdefd6; color:#8a5300; }
+    .REPOSANDO { background:#e4e9f8; color:#2f4a8a; }
+    .LISTO, .CUBIERTO { background:#ddf2e6; color:#1f6b45; }
+    .EMBOTELLADO, .ENTREGADO { background:#ece6e8; color:#5b4d52; }
+    .RESERVADO { background:#e4e9f8; color:#2f4a8a; }
+    .SIN_PRODUCCION, .RIESGO { background:#f6dcdf; color:#7a1a2a; }
+    .tag { font-size:.78rem; background:#f2eadb; border-radius:4px; padding:2px 6px; }
+    .entregados { opacity:.7; }
+
     @media (max-width: 860px) { .kpis { grid-template-columns:repeat(2, 1fr); } }
     @media (max-width: 480px) {
       header { padding:10px 14px; }
@@ -84,20 +100,92 @@
       <div class="kpi"><b id="k-pedidos">—</b><span>Pedidos pendientes</span></div>
     </div>
 
+    <section>
+      <h2>Alertas</h2>
+      <div id="alertas"><div class="vacio">Cargando…</div></div>
+    </section>
+
     <section id="lotes">
       <h2>Lotes</h2>
-      <div class="vacio">Aquí se mostrarán los lotes en producción.</div>
+      <div id="lista-lotes" class="lista"><div class="vacio">Cargando…</div></div>
     </section>
 
     <section id="pedidos">
-      <h2>Pedidos pendientes</h2>
-      <div class="vacio">Aquí se mostrarán los pedidos pendientes por orden de llegada.</div>
+      <h2>Pedidos por orden de llegada</h2>
+      <div id="lista-pedidos" class="lista"><div class="vacio">Cargando…</div></div>
     </section>
   </main>
 
   <footer>Casa Aurora · Panel privado · LEARN-CAP-1E72416E</footer>
 
   <script>
+    // ---------- Utilidades ----------
+    const $ = (id) => document.getElementById(id);
+    const esc = (t) => String(t ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const fecha = (iso) => { if (!iso) return "—"; const [a, m, d] = iso.split("-"); return `${d}/${m}/${a}`; };
+    const lempiras = (n) => "L." + Number(n).toLocaleString("es-HN", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    const nombreEstado = (e) => e.replace("_", " ");
+
+    async function api(ruta) {
+      const r = await fetch(ruta, { credentials: "same-origin", cache: "no-store" });
+      if (r.status === 401) { location.href = "/login"; throw new Error("Sin sesión"); }
+      if (!r.ok) throw new Error("Error " + r.status);
+      return r.json();
+    }
+
+    // ---------- Resumen y alertas ----------
+    function pintarResumen(r) {
+      $("k-disponibles").textContent = r.botellasDisponibles;
+      $("k-producidas").textContent = r.botellasProducidas;
+      $("k-lotes").textContent = r.lotesEnProceso;
+      $("k-pedidos").textContent = r.pedidosPendientes;
+      $("alertas").innerHTML = r.alertas.length
+        ? r.alertas.map((a) => `<div class="alerta">${esc(a)}</div>`).join("")
+        : `<div class="sin-alertas">Todo en orden: no hay lotes por embotellar ni pedidos en riesgo.</div>`;
+    }
+
+    // ---------- Lotes ----------
+    function pintarLotes(lotes) {
+      if (!lotes.length) { $("lista-lotes").innerHTML = `<div class="vacio">Todavía no hay lotes.</div>`; return; }
+      $("lista-lotes").innerHTML = lotes.map((l) => `
+        <div class="item">
+          <div class="cab">
+            <strong>Lote #${l.id} · ${esc(l.litros)} L</strong>
+            <span class="chip ${l.estado}">${nombreEstado(l.estado)}</span>
+          </div>
+          <p class="meta">Inicio ${fecha(l.fechaInicio)} · día ${l.diasTranscurridos} · listo ${fecha(l.fechaListaEstimada)}${l.diasExtra ? ` (+${l.diasExtra} días por temperatura)` : ""}</p>
+          <p class="meta">${l.fechaEmbotellado
+            ? `Embotellado el ${fecha(l.fechaEmbotellado)}: <strong>${l.botellasObtenidas} botellas</strong>`
+            : `Estimado: ~${l.botellasEstimadas} botellas`}${l.observaciones ? ` · ${esc(l.observaciones)}` : ""}</p>
+        </div>`).join("");
+    }
+
+    // ---------- Pedidos ----------
+    function pintarPedidos(pedidos) {
+      if (!pedidos.length) { $("lista-pedidos").innerHTML = `<div class="vacio">Todavía no hay pedidos.</div>`; return; }
+      $("lista-pedidos").innerHTML = pedidos.map((p) => `
+        <div class="item ${p.estado === "ENTREGADO" ? "entregados" : ""}">
+          <div class="cab">
+            <span><strong>#${p.id} · ${esc(p.cliente)}</strong> <span class="tag">${esc(p.canal)}</span></span>
+            <span><span class="chip ${p.estado}">${nombreEstado(p.estado)}</span>${p.enRiesgo ? ` <span class="chip RIESGO">En riesgo</span>` : ""}</span>
+          </div>
+          <p class="meta">${p.cantidad} botellas × ${lempiras(p.precioUnitario)} = <strong>${lempiras(p.total)}</strong> · pedido ${fecha(p.fechaPedido)} · entrega ${fecha(p.fechaEntrega)}${p.telefono ? ` · ${esc(p.telefono)}` : ""}</p>
+          <p class="meta">${esc(p.detalle)}</p>
+        </div>`).join("");
+    }
+
+    async function cargarTodo() {
+      try {
+        const [resumen, lotes, pedidos] = await Promise.all([api("/api/resumen"), api("/api/lotes"), api("/api/pedidos")]);
+        pintarResumen(resumen);
+        pintarLotes(lotes);
+        pintarPedidos(pedidos);
+      } catch (e) {
+        console.warn(e);
+      }
+    }
+    void cargarTodo();
+
     // Usuario que inició sesión
     fetch("/api/yo", { credentials: "same-origin", cache: "no-store" })
       .then((r) => r.ok ? r.json() : Promise.reject())
