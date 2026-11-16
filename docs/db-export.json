@@ -1,0 +1,80 @@
+{
+  "generado_at": "2026-11-16T02:23:29Z",
+  "motor": "h2",
+  "tablas": [
+    {
+      "nombre": "cliente",
+      "filas": 6,
+      "columnas": [
+        {"nombre":"id","tipo":"bigint","pk":true,"nulo":false},
+        {"nombre":"canal_preferido","tipo":"character varying","nulo":true},
+        {"nombre":"telefono","tipo":"character varying","nulo":true},
+        {"nombre":"nombre","tipo":"character varying","nulo":false}
+      ],
+      "indices": ["idx_cliente_nombre"],
+      "relaciones": [],
+      "politicas_rls": ["cliente_lectura_solo_admin", "cliente_escritura_solo_admin"]
+    },
+    {
+      "nombre": "insumo",
+      "filas": 4,
+      "columnas": [
+        {"nombre":"id","tipo":"bigint","pk":true,"nulo":false},
+        {"nombre":"unidad","tipo":"character varying","nulo":false},
+        {"nombre":"nombre","tipo":"character varying","nulo":false}
+      ],
+      "indices": [],
+      "relaciones": [],
+      "politicas_rls": ["insumo_lectura_solo_admin", "insumo_escritura_solo_admin"]
+    },
+    {
+      "nombre": "lote",
+      "filas": 6,
+      "columnas": [
+        {"nombre":"botellas_estimadas","tipo":"integer","nulo":false},
+        {"nombre":"botellas_obtenidas","tipo":"integer","nulo":true},
+        {"nombre":"dias_extra","tipo":"integer","nulo":false},
+        {"nombre":"dias_fermentacion","tipo":"integer","nulo":false},
+        {"nombre":"dias_reposo","tipo":"integer","nulo":false},
+        {"nombre":"fecha_embotellado","tipo":"date","nulo":true},
+        {"nombre":"fecha_inicio","tipo":"date","nulo":false},
+        {"nombre":"litros","tipo":"numeric","nulo":false},
+        {"nombre":"id","tipo":"bigint","pk":true,"nulo":false},
+        {"nombre":"observaciones","tipo":"character varying","nulo":true}
+      ],
+      "indices": ["idx_lote_fecha_inicio"],
+      "relaciones": [],
+      "politicas_rls": ["lote_lectura_solo_admin", "lote_escritura_solo_admin"]
+    },
+    {
+      "nombre": "lote_insumo",
+      "filas": 24,
+      "columnas": [
+        {"nombre":"cantidad","tipo":"numeric","nulo":false},
+        {"nombre":"id","tipo":"bigint","pk":true,"nulo":false},
+        {"nombre":"insumo_id","tipo":"bigint","nulo":false},
+        {"nombre":"lote_id","tipo":"bigint","nulo":false}
+      ],
+      "indices": [],
+      "relaciones": [{"columna":"insumo_id","referencia":"insumo.id"}, {"columna":"lote_id","referencia":"lote.id"}],
+      "politicas_rls": ["lote_insumo_lectura_solo_admin", "lote_insumo_escritura_solo_admin"]
+    },
+    {
+      "nombre": "pedido",
+      "filas": 8,
+      "columnas": [
+        {"nombre":"cantidad","tipo":"integer","nulo":false},
+        {"nombre":"entregado","tipo":"boolean","nulo":false},
+        {"nombre":"fecha_entrega","tipo":"date","nulo":false},
+        {"nombre":"fecha_pedido","tipo":"date","nulo":false},
+        {"nombre":"precio_unitario","tipo":"numeric","nulo":false},
+        {"nombre":"cliente_id","tipo":"bigint","nulo":false},
+        {"nombre":"id","tipo":"bigint","pk":true,"nulo":false},
+        {"nombre":"canal","tipo":"character varying","nulo":false}
+      ],
+      "indices": ["idx_pedido_fecha_entrega"],
+      "relaciones": [{"columna":"cliente_id","referencia":"cliente.id"}],
+      "politicas_rls": ["pedido_lectura_solo_admin", "pedido_escritura_solo_admin"]
+    }
+  ]
+}
