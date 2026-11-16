@@ -48,7 +48,7 @@
 
     <form id="form-login" method="post" action="/login">
       <label for="username">Usuario</label>
-      <input id="username" name="username" autocomplete="username" required autofocus>
+      <input id="username" name="username" autocomplete="username" required>
 
       <label for="password">Contraseña</label>
       <input id="password" name="password" type="password" autocomplete="current-password" required>
@@ -78,7 +78,7 @@
           campo.value = d.token;
         });
     }
-    cargarCsrf();
+    void cargarCsrf();
 
     // Envío del login sin recargar la página: el servidor responde {ok:true} o 401
     form.addEventListener("submit", async (e) => {
