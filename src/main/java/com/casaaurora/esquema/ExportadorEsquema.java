@@ -8,7 +8,6 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -31,8 +30,11 @@ import org.springframework.stereotype.Component;
 
 import com.casaaurora.modelo.PoliticaAcceso;
 
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Table;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.metamodel.EntityType;
 
 /**
@@ -73,6 +75,7 @@ public class ExportadorEsquema implements ApplicationRunner {
 
     String exportar() throws SQLException, IOException {
         Map<String, String[]> politicas = politicasPorTabla();
+        Map<String, Long> filasPorTabla = filasPorTabla();
         StringBuilder sb = new StringBuilder();
         int totalTablas = 0, totalRelaciones = 0, totalIndices = 0, conDatos = 0, conPoliticas = 0;
 
@@ -133,11 +136,7 @@ public class ExportadorEsquema implements ApplicationRunner {
                     }
                 }
 
-                long filas;
-                try (Statement st = c.createStatement(); ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM " + tabla)) {
-                    rs.next();
-                    filas = rs.getLong(1);
-                }
+                long filas = filasPorTabla.getOrDefault(nombre, 0L);
 
                 List<String> pol = new ArrayList<>();
                 for (String p : politicas.getOrDefault(nombre, new String[0])) {
@@ -165,6 +164,29 @@ public class ExportadorEsquema implements ApplicationRunner {
         resumen = "Tablas: " + totalTablas + " | Relaciones: " + totalRelaciones + " | Indices: " + totalIndices
                 + " | Tablas con datos: " + conDatos + " | Tablas con politicas: " + conPoliticas;
         return sb.toString();
+    }
+
+    /**
+     * Cuenta las filas de cada tabla con consultas JPA Criteria (sin armar SQL con texto),
+     * para evitar cualquier riesgo de inyección SQL.
+     */
+    private Map<String, Long> filasPorTabla() {
+        Map<String, Long> mapa = new HashMap<>();
+        EntityManager em = emf.createEntityManager();
+        try {
+            CriteriaBuilder cb = em.getCriteriaBuilder();
+            for (EntityType<?> entidad : emf.getMetamodel().getEntities()) {
+                Table tabla = entidad.getJavaType().getAnnotation(Table.class);
+                if (tabla != null) {
+                    CriteriaQuery<Long> consulta = cb.createQuery(Long.class);
+                    consulta.select(cb.count(consulta.from(entidad.getJavaType())));
+                    mapa.put(tabla.name().toLowerCase(Locale.ROOT), em.createQuery(consulta).getSingleResult());
+                }
+            }
+        } finally {
+            em.close();
+        }
+        return mapa;
     }
 
     /** Lee las políticas declaradas con @PoliticaAcceso en cada entidad JPA. */

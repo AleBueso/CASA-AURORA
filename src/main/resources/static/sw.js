@@ -58,11 +58,12 @@ self.addEventListener("fetch", (event) => {
     caches.match(req).then((guardado) =>
       guardado ||
       fetch(req).then((resp) => {
-        if (resp.ok) {
-          const copia = resp.clone();
-          caches.open(CACHE).then((cache) => cache.put(req, copia));
-        }
-        return resp;
+        if (!resp.ok) return resp;
+        const copia = resp.clone();
+        // Se espera a que la copia quede guardada antes de responder
+        return caches.open(CACHE)
+          .then((cache) => cache.put(req, copia))
+          .then(() => resp);
       })
     )
   );
