@@ -41,3 +41,26 @@ Los pedidos y reservas se anotan en un cuaderno o en el celular solo cuando hay 
 - [ ] Módulo de lotes
 - [ ] Módulo de pedidos
 - [ ] Interfaz web para celular
+## Flujo de trabajo con Git
+
+El proyecto usa **GitHub Flow**: `main` siempre está estable y desplegado (Render + Vercel), y todo cambio entra por un pull request desde una rama de trabajo.
+
+### Ramas
+| Prefijo | Para qué | Ejemplo |
+|---|---|---|
+| `feat/` | Funcionalidad nueva | `feat/registrar-lotes` |
+| `fix/` | Corrección de errores | `fix/login-proxy` |
+| `docs/` | Documentación | `docs/plantilla-pr` |
+| `test/` | Pruebas | `test/pedidos` |
+| `ci/` | Pipeline y configuración | `ci/pruebas-en-pr` |
+
+### Commits
+Se usa el formato de **Conventional Commits**: `tipo: descripción en presente`.
+Ejemplos: `feat: permite registrar un lote nuevo desde el panel`, `fix: corrige el estado de un lote embotellado`.
+
+### Antes de mergear un pull request
+1. `./mvnw verify` pasa sin errores y GitHub Actions está en verde.
+2. La cobertura se mantiene arriba del 60 % y SonarCloud no reporta bugs ni vulnerabilidades.
+3. El cambio no incluye contraseñas, tokens ni archivos `.env`.
+4. Se probó en el panel con datos de prueba.
+5. Se mergea con **Rebase and merge** para mantener un historial lineal.
