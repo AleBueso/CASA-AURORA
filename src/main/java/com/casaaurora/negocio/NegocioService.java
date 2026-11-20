@@ -82,10 +82,15 @@ public class NegocioService {
 
     /** Botellas físicas en bodega = embotelladas − entregadas. */
     static int botellasEnBodega(List<Lote> todosLosLotes, List<Pedido> todosLosPedidos) {
-        int embotelladas = todosLosLotes.stream()
-                .mapToInt(l -> l.getBotellasObtenidas() == null ? 0 : l.getBotellasObtenidas()).sum();
+        int embotelladas = botellasEmbotelladas(todosLosLotes);
         int entregadas = todosLosPedidos.stream().filter(Pedido::isEntregado).mapToInt(Pedido::getCantidad).sum();
         return embotelladas - entregadas;
+    }
+
+    /** Total de botellas que salieron de los lotes ya embotellados. */
+    static int botellasEmbotelladas(List<Lote> todosLosLotes) {
+        return todosLosLotes.stream()
+                .mapToInt(l -> l.getBotellasObtenidas() == null ? 0 : l.getBotellasObtenidas()).sum();
     }
 
     /**
@@ -137,23 +142,27 @@ public class NegocioService {
                 }
             }
 
-            EstadoPedido estado;
-            String detalle;
-            if (falta > 0) {
-                estado = EstadoPedido.SIN_PRODUCCION;
-                detalle = "Faltan " + falta + " botellas: no hay lote que las cubra";
-                disponible = null;
-            } else if (partes.size() == 1 && deBodega > 0) {
-                estado = EstadoPedido.CUBIERTO;
-                detalle = deBodega + " botellas apartadas de bodega";
-            } else {
-                estado = EstadoPedido.RESERVADO;
-                detalle = String.join(" + ", partes) + " · disponible " + disponible.format(FECHA);
-            }
-            boolean enRiesgo = estado == EstadoPedido.SIN_PRODUCCION || disponible.isAfter(p.getFechaEntrega());
-            resultado.put(p.getId(), vista(p, estado, detalle, disponible, enRiesgo));
+            resultado.put(p.getId(), clasificarPedido(p, falta, deBodega, partes, disponible));
         }
         return new Asignacion(resultado, enBodega, comprometidas);
+    }
+
+    /**
+     * Decide el estado de un pedido pendiente una vez repartidas las botellas:
+     * SIN_PRODUCCION si aún faltan, CUBIERTO si todo salió de bodega y RESERVADO
+     * si depende de lotes en proceso. También marca si llega tarde a la entrega.
+     */
+    static PedidoVista clasificarPedido(Pedido p, int falta, int deBodega, List<String> partes, LocalDate disponible) {
+        if (falta > 0) {
+            String detalle = "Faltan " + falta + " botellas: no hay lote que las cubra";
+            return vista(p, EstadoPedido.SIN_PRODUCCION, detalle, null, true);
+        }
+        boolean enRiesgo = disponible.isAfter(p.getFechaEntrega());
+        if (partes.size() == 1 && deBodega > 0) {
+            return vista(p, EstadoPedido.CUBIERTO, deBodega + " botellas apartadas de bodega", disponible, enRiesgo);
+        }
+        String detalle = String.join(" + ", partes) + " · disponible " + disponible.format(FECHA);
+        return vista(p, EstadoPedido.RESERVADO, detalle, disponible, enRiesgo);
     }
 
     private static PedidoVista vista(Pedido p, EstadoPedido estado, String detalle, LocalDate disponible, boolean enRiesgo) {
@@ -180,8 +189,7 @@ public class NegocioService {
         List<Pedido> todosLosPedidos = pedidos.findAll();
         Asignacion a = asignar(todosLosLotes, todosLosPedidos, hoy);
 
-        int producidas = todosLosLotes.stream()
-                .mapToInt(l -> l.getBotellasObtenidas() == null ? 0 : l.getBotellasObtenidas()).sum();
+        int producidas = botellasEmbotelladas(todosLosLotes);
         List<Lote> enProceso = todosLosLotes.stream().filter(l -> l.getFechaEmbotellado() == null).toList();
         int enProduccion = enProceso.stream().mapToInt(Lote::getBotellasEstimadas).sum();
         int pendientes = (int) todosLosPedidos.stream().filter(p -> !p.isEntregado()).count();
